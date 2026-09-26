@@ -7,6 +7,9 @@ from sqlmodel import Session
 
 from app.config import settings
 from app.db import create_db_and_tables, get_session
+import app.models  # noqa: F401 — registers all SQLModel tables before create_all()
+from app.routers import sessions
+from app.routers import ws as ws_router
 
 
 @asynccontextmanager
@@ -39,3 +42,12 @@ def health_check(session: Session = Depends(get_session)):
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             content={"status": "error", "db": "error", "env": settings.APP_ENV},
         )
+
+
+# ---------------------------------------------------------------------------
+# Routers
+# ---------------------------------------------------------------------------
+
+app.include_router(sessions.router, prefix="/api")
+# WebSocket router mounts without prefix — full path is /ws/sessions/{room_code}
+app.include_router(ws_router.router)

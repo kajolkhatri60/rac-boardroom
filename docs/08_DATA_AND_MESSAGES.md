@@ -109,7 +109,8 @@ Each endpoint checks the role.
 
 ## 3. Live messages (WebSocket)
 
-**Connect:** `wss://<host>/ws/sessions/{session_id}?token=<JWT>`
+**Connect (TEMPORARY until Stage 3 auth):** `ws://<host>/ws/sessions/{room_code}?participant_id=<id>`
+_(Will become `wss://<host>/ws/sessions/{room_code}?token=<JWT>` in Stage 3.)_
 
 **Every message:** `{ "type": "...", "payload": { ... } }`
 
@@ -145,10 +146,12 @@ Each endpoint checks the role.
 | `clarification_requested` | Board | `question_id`, `note` |
 | `clarification_given` | All | `question_id`, `text` |
 | `answer_submitted` | Board (candidate gets an ack) | answer |
+| `answer_ack` | Candidate only | `question_id` |
 | `question_scored` | **Training mode only**, to the expert | score + reason + depth + flag |
 | `interview_ended` | All | — |
 | `results_ready` | Board | — |
 | `rtc_signal` | Target | `from`, `data` |
+| `pong` | Sender | — |
 | `video_frame` | Board only | `jpeg_base64`, `at` |
 | `error` | Sender | `message` |
 

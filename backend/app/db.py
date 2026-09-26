@@ -1,8 +1,11 @@
 import sqlite3
+from contextlib import contextmanager
 from typing import Generator
+
 from sqlalchemy import event
 from sqlalchemy.engine import Engine
 from sqlmodel import SQLModel, Session, create_engine
+
 from app.config import settings
 
 connect_args = {}
@@ -30,5 +33,19 @@ def create_db_and_tables() -> None:
 
 
 def get_session() -> Generator[Session, None, None]:
+    """FastAPI dependency: yields a DB session for HTTP request handlers."""
+    with Session(engine) as session:
+        yield session
+
+
+@contextmanager
+def session_ctx():
+    """
+    Context manager for short-lived DB sessions used in WebSocket handlers
+    and background tasks where FastAPI DI is not available.
+
+    Reads the module-level ``engine`` at call time, so patching
+    ``app.db.engine`` in tests affects both this and ``get_session``.
+    """
     with Session(engine) as session:
         yield session
