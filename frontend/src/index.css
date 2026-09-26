@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+@theme {
+  --color-gov-navy-950: #0a192f;
+  --color-gov-navy-900: #0f2547;
+  --color-gov-navy-800: #1b3a6b;
+  --color-gov-navy-700: #254d8c;
+  --color-gov-navy-600: #3366ad;
+  --color-gov-navy-500: #447dc9;
+
+  --color-gov-gray-50: #f8fafc;
+  --color-gov-gray-100: #f1f5f9;
+  --color-gov-gray-200: #e2e8f0;
+  --color-gov-gray-300: #cbd5e1;
+  --color-gov-gray-400: #94a3b8;
+  --color-gov-gray-500: #64748b;
+  --color-gov-gray-600: #475569;
+  --color-gov-gray-700: #334155;
+  --color-gov-gray-800: #1e293b;
+  --color-gov-gray-900: #0f172a;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
