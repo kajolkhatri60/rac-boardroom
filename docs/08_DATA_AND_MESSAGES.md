@@ -129,6 +129,7 @@ Each endpoint checks the role.
 | `proctor_event` | Candidate | `type`, `duration_s` |
 | `end_interview` | Chairman | — |
 | `rtc_signal` | Anyone | `to`, `data` (WebRTC setup) |
+| `video_frame` | Candidate | `jpeg_base64`, `at` |
 | `ping` | Anyone | — |
 
 ### Server → client
@@ -148,7 +149,10 @@ Each endpoint checks the role.
 | `interview_ended` | All | — |
 | `results_ready` | Board | — |
 | `rtc_signal` | Target | `from`, `data` |
+| `video_frame` | Board only | `jpeg_base64`, `at` |
 | `error` | Sender | `message` |
+
+Fallback when WebRTC fails: the candidate sends a small JPEG every second and the server forwards it only to board members.
 
 ### Role filter for `snapshot`
 - **Candidate:** phase, board seats, own questions and answers. **Never scores, marks or proctoring.**

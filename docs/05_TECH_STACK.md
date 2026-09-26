@@ -129,11 +129,8 @@ rac-boardroom-sim/
 
 ## AI coding tools we use to build
 
-| Tool | Role |
-|---|---|
-| **Gemini CLI** | Main coding agent (free personal-account quota) |
-| **Freebuff** | Backup when the quota runs out. In India, expect limited models. Never pick models that retain prompts |
-| **GitHub Copilot** (if students qualify via GitHub Education) | Autocomplete in VS Code |
-
-- Every teammate uses their **own** accounts.
-- The app's Gemini API key (for scoring) uses a **separate** Google account/project, so coding work doesn't eat the demo quota.
+- Main tool: Google Antigravity (rules in .agents/rules/project.md, set to Always On)
+- Backup: Freebuff (never use models that retain prompts)
+- Autocomplete: GitHub Copilot (Free, or an existing Student plan)
+- Note: Gemini CLI is no longer free for personal accounts
+- Every teammate uses their own accounts; the app's Gemini API key comes from a separate Google account
