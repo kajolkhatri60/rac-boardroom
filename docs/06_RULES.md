@@ -51,3 +51,14 @@ Every developer and every AI coding tool must follow these. If a task seems to n
 30. **Commit after every working piece**, with a clear message.
 31. **One branch per feature** (`feature/<name>`). Merge into `main` through a Pull Request. `main` must always work.
 32. Use the PS words in the UI: Selector / Applicant, Board, Chairman.
+
+## G. Recruitment portal and UI
+
+33. **Applicants never receive screening results**, match numbers, board notes or audit details, from any endpoint.
+34. **The system never shortlists, rejects or schedules on its own.** The admin decides. AI output is labelled "AI-assisted".
+35. **Every AI quote is verified in code** against the source text. Unverified evidence counts as none.
+36. **Redact identity before any AI call on a resume** (`13_RECRUITMENT_PORTAL.md` section 7.2).
+37. After P7, **identity and seat role always come from the JWT + database**, never from the client.
+38. **Every state change writes an AuditEvent** (publish, shortlist, schedule, confirm profile, final score…).
+39. **Every screen follows `docs/12_UI_GUIDE.md`** and uses only the components in `frontend/src/components/ui/`. The banned list in section 10 of that guide applies everywhere.
+40. **No official emblems, seals or logos** (State Emblem, DRDO logo). The identity is text only.
