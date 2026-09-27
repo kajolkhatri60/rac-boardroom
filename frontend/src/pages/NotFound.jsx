@@ -1,23 +1,25 @@
+import React from 'react';
 import { Link } from 'react-router-dom';
+import AuthLayout from '../layouts/AuthLayout';
+import { PageHeader, EmptyState, Button } from '../components/ui';
 
 export default function NotFound() {
   return (
-    <div className="max-w-md mx-auto py-16 px-6 text-center">
-      <div className="bg-white border border-gov-gray-300 rounded p-8 shadow-sm">
-        <h1 className="text-4xl font-bold text-gov-navy-950">404</h1>
-        <p className="text-lg font-semibold text-gov-gray-800 mt-2">Page Not Found</p>
-        <p className="text-sm text-gov-gray-600 mt-1">
-          The requested page or interview session route does not exist.
-        </p>
-        <div className="mt-6">
-          <Link
-            to="/"
-            className="inline-block bg-gov-navy-800 hover:bg-gov-navy-900 text-white font-medium text-sm px-4 py-2 rounded transition-colors"
-          >
-            Return to Home
+    <AuthLayout>
+      <PageHeader
+        breadcrumbs={[{ label: 'Home', href: '/login' }, { label: 'Not found' }]}
+        title="404 — Page not found"
+      />
+      <EmptyState
+        message="The requested page could not be found. Check the URL or return to sign in."
+        actionComponent={
+          <Link to="/login">
+            <Button variant="primary">
+              Return to sign in
+            </Button>
           </Link>
-        </div>
-      </div>
-    </div>
+        }
+      />
+    </AuthLayout>
   );
 }

@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { useParams, useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { useRoomStore } from '../realtime/roomStore';
 import { connectRoomSocket } from '../realtime/socket';
+import { useSpeechToText } from '../lib/speech/useSpeechToText';
+import { Mic, MicOff } from 'lucide-react';
 
 export default function BoardRoom() {
   const { code, sessionId } = useParams();
@@ -32,6 +34,19 @@ export default function BoardRoom() {
   const [followUpOf, setFollowUpOf] = useState('');
   const [copiedCode, setCopiedCode] = useState(false);
 
+  // Dictate question
+  const {
+    isSupported: sttSupported,
+    isListening: isDictating,
+    start: startDictating,
+    stop: stopDictating,
+    reset: resetDictating,
+  } = useSpeechToText({
+    onTranscriptChange: (text) => {
+      setQuestionText(text);
+    },
+  });
+
   // Connect socket with React StrictMode safety
   useEffect(() => {
     if (!roomCode || !participantId) return;
@@ -61,7 +76,7 @@ export default function BoardRoom() {
   // Role check: if me is candidate, redirect to candidate room
   useEffect(() => {
     if (me && me.seat_role === 'candidate') {
-      navigate(`/candidate/${roomCode}?pid=${participantId}`, { replace: true });
+      navigate(`/room/${roomCode}/candidate?pid=${participantId}`, { replace: true });
     }
   }, [me, roomCode, participantId, navigate]);
 
@@ -101,10 +116,28 @@ export default function BoardRoom() {
     }
   };
 
+  const handleToggleDictate = () => {
+    if (isDictating) {
+      stopDictating();
+    } else {
+      startDictating(questionText);
+    }
+  };
+
+  const handleQuestionChange = (e) => {
+    if (isDictating) {
+      stopDictating({ updateText: false });
+    }
+    setQuestionText(e.target.value);
+  };
+
   const handleAskQuestion = (e) => {
     e.preventDefault();
     const text = questionText.trim();
     if (!text || !socketRef.current) return;
+
+    stopDictating({ updateText: false });
+    resetDictating();
 
     const payload = {
       text,
@@ -132,7 +165,7 @@ export default function BoardRoom() {
             Missing room code or participant ID parameter.
           </p>
           <Link
-            to="/join"
+            to="/dev/join"
             className="inline-block mt-4 text-xs font-semibold text-gov-navy-700 underline"
           >
             ← Return to Join Page
@@ -197,7 +230,7 @@ export default function BoardRoom() {
             </p>
           </div>
           <Link
-            to="/join"
+            to="/dev/join"
             className="text-xs text-gov-gray-500 hover:text-gov-navy-900 underline"
           >
             Leave
@@ -345,14 +378,40 @@ export default function BoardRoom() {
         <div className="lg:col-span-8 space-y-4">
           {/* Question Composer Box */}
           <div className="bg-white border border-gov-gray-300 rounded-lg p-5 shadow-xs">
-            <h2 className="text-xs font-bold text-gov-navy-950 uppercase tracking-wider mb-2">
-              Pose / Queue Question
-            </h2>
+            <div className="flex items-center justify-between border-b border-gov-gray-200 pb-2 mb-3">
+              <h2 className="text-xs font-bold text-gov-navy-950 uppercase tracking-wider">
+                Pose / Queue Question
+              </h2>
+              {sttSupported && !isLobby && (
+                <button
+                  type="button"
+                  onClick={handleToggleDictate}
+                  className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded font-semibold transition-colors cursor-pointer border ${
+                    isDictating
+                      ? 'bg-rose-100 text-rose-800 border-rose-300 animate-pulse'
+                      : 'bg-gov-gray-100 hover:bg-gov-gray-200 text-gov-navy-900 border-gov-gray-300'
+                  }`}
+                  title="Dictate question using speech-to-text"
+                >
+                  {isDictating ? (
+                    <>
+                      <MicOff className="w-3.5 h-3.5 text-rose-700" />
+                      <span>Stop dictating</span>
+                    </>
+                  ) : (
+                    <>
+                      <Mic className="w-3.5 h-3.5 text-gov-navy-900" />
+                      <span>Dictate</span>
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
             <form onSubmit={handleAskQuestion} className="space-y-3">
               <div>
                 <textarea
                   value={questionText}
-                  onChange={(e) => setQuestionText(e.target.value)}
+                  onChange={handleQuestionChange}
                   placeholder={
                     isLobby
                       ? 'Questions cannot be posed while the session is in the lobby.'

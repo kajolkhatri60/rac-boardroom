@@ -62,9 +62,9 @@ export default function Join() {
 
       // TEMPORARY: pid in the URL until login exists (Stage 3).
       if (seatRole === 'candidate') {
-        navigate(`/candidate/${cleanCode}?pid=${participant.id}`);
+        navigate(`/room/${cleanCode}/candidate?pid=${participant.id}`);
       } else {
-        navigate(`/board/${cleanCode}?pid=${participant.id}`);
+        navigate(`/room/${cleanCode}/board?pid=${participant.id}`);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
@@ -77,7 +77,7 @@ export default function Join() {
     <div className="max-w-md mx-auto py-12 px-6">
       <div className="bg-white border border-gov-gray-300 rounded-lg p-6 shadow-sm">
         <h1 className="text-2xl font-bold text-gov-navy-950 text-center tracking-tight">
-          Join Interview Session
+          Join interview session
         </h1>
         <p className="text-xs text-gov-gray-600 text-center mt-1">
           DRDO Recruitment &amp; Assessment Centre · Boardroom Simulation
@@ -92,7 +92,7 @@ export default function Join() {
             disabled={creating}
             className="w-full bg-white hover:bg-gov-gray-100 text-gov-navy-900 border border-gov-gray-300 text-xs font-semibold py-2 px-3 rounded shadow-xs transition-colors cursor-pointer disabled:opacity-50"
           >
-            {creating ? 'Creating Room…' : '+ Create New Room'}
+            {creating ? 'Creating room…' : 'Create new room'}
           </button>
           {createdNotice && (
             <p className="text-xs font-mono font-bold text-emerald-700 mt-2">
@@ -109,8 +109,8 @@ export default function Join() {
 
         <form onSubmit={handleJoin} className="mt-5 space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-gov-gray-700 uppercase tracking-wider mb-1">
-              Room Code
+            <label className="block text-xs font-semibold text-gov-gray-700 mb-1">
+              Room code
             </label>
             <input
               type="text"
@@ -124,8 +124,8 @@ export default function Join() {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-gov-gray-700 uppercase tracking-wider mb-1">
-              Your Name
+            <label className="block text-xs font-semibold text-gov-gray-700 mb-1">
+              Your name
             </label>
             <input
               type="text"
@@ -138,8 +138,8 @@ export default function Join() {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-gov-gray-700 uppercase tracking-wider mb-1">
-              Seat Role
+            <label className="block text-xs font-semibold text-gov-gray-700 mb-1">
+              Seat role
             </label>
             <select
               value={seatRole}
@@ -154,8 +154,8 @@ export default function Join() {
 
           {seatRole === 'expert' && (
             <div>
-              <label className="block text-xs font-semibold text-gov-gray-700 uppercase tracking-wider mb-1">
-                Domain / Specialisation
+              <label className="block text-xs font-semibold text-gov-gray-700 mb-1">
+                Domain or specialisation
               </label>
               <input
                 type="text"
@@ -173,16 +173,16 @@ export default function Join() {
             disabled={loading}
             className="w-full bg-gov-navy-900 hover:bg-gov-navy-800 text-white font-medium py-2.5 rounded text-sm transition-colors shadow-xs cursor-pointer disabled:opacity-50"
           >
-            {loading ? 'Joining Room…' : 'Enter Interview Room'}
+            {loading ? 'Joining room…' : 'Enter interview room'}
           </button>
         </form>
 
         <div className="mt-6 text-center border-t border-gov-gray-200 pt-4">
           <Link
-            to="/"
+            to="/login"
             className="text-xs text-gov-navy-700 hover:text-gov-navy-900 font-medium underline"
           >
-            ← Return to Overview
+            Return to sign in
           </Link>
         </div>
       </div>

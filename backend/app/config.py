@@ -16,7 +16,14 @@ def _get_bool(key: str, default: bool) -> bool:
     return val.strip().lower() in ("true", "1", "yes", "on")
 
 
-@dataclass(frozen=True)
+def _get_int(key: str, default: int) -> int:
+    val = os.getenv(key)
+    if val is None or not val.strip().isdigit():
+        return default
+    return int(val.strip())
+
+
+@dataclass
 class Settings:
     APP_ENV: str = os.getenv("APP_ENV", "dev")
     DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./rac.db")
@@ -24,6 +31,15 @@ class Settings:
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
     GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "")
     DEMO_MODE: bool = _get_bool("DEMO_MODE", True)
+    JWT_SECRET: str = os.getenv("JWT_SECRET", "")
+    JWT_EXPIRE_HOURS: int = _get_int("JWT_EXPIRE_HOURS", 12)
+    DEMO_PASSWORD: str = os.getenv("DEMO_PASSWORD", "")
 
 
 settings = Settings()
+
+
+def validate_config():
+    """Verify essential configuration at server startup."""
+    if not settings.JWT_SECRET:
+        raise RuntimeError("JWT_SECRET is not set in backend/.env")

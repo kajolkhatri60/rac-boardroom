@@ -24,6 +24,7 @@ from app.realtime.events import (
     handle_admit_candidate,
     handle_ask_question,
     handle_pass_question,
+    handle_proctor_event,
     handle_set_phase,
     handle_submit_answer,
 )
@@ -167,6 +168,10 @@ async def handle_message(
     # -------------------------------------------------------- pass_question
     elif msg.type == "pass_question":
         await handle_pass_question(msg.payload, participant, room_code, manager)
+
+    # -------------------------------------------------------- proctor_event
+    elif msg.type == "proctor_event":
+        await handle_proctor_event(msg.payload, participant, room_code, manager)
 
     # --------------------------------------------------------- unknown type
     else:

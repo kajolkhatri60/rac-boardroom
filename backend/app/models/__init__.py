@@ -15,3 +15,21 @@ from app.models.session import (  # noqa: F401
     QuestionStatus,
     generate_room_code,
 )
+from app.models.portal import (  # noqa: F401
+    User,
+    Post,
+    PostRequirement,
+    AuditEvent,
+    UserRole,
+    Discipline,
+    Grade,
+    InterviewType,
+    PostStatus,
+    RequirementKind,
+    DEFAULT_GRADE_WEIGHTS,
+)
+from app.models.proctor import (  # noqa: F401
+    ProctorEvent,
+    ProctorEventType,
+    ALLOWED_PROCTOR_EVENT_TYPES,
+)

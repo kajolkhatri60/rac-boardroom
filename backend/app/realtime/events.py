@@ -15,11 +15,12 @@ Handlers in this module:
 """
 
 import logging
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
-from sqlmodel import select
+from sqlmodel import func, select
 
 import app.db
+from app.models.proctor import ALLOWED_PROCTOR_EVENT_TYPES, ProctorEvent
 from app.models.session import (
     Answer,
     InterviewSession,
@@ -497,3 +498,106 @@ async def handle_pass_question(
     manager: RoomManager,
 ) -> None:
     await _handle_answer_or_pass(payload, participant, room_code, manager, passing=True)
+
+
+# ---------------------------------------------------------------------------
+# Proctor event handler (Rule G / S4a)
+# ---------------------------------------------------------------------------
+
+async def handle_proctor_event(
+    payload: dict,
+    participant: Participant,
+    room_code: str,
+    manager: RoomManager,
+) -> None:
+    """
+    proctor_event — candidate only.
+    Saved silently to DB.
+    Never broadcast to board, candidate, or anyone.
+    Allowed only after admit (session.phase != lobby).
+    Validates type, duration_s (0-7200s), and rate limit (max 60/min).
+    """
+    if participant.seat_role != SeatRole.candidate:
+        await _err(manager, participant, room_code, "Only the candidate can report proctor events.")
+        return
+
+    event_type = payload.get("type")
+    if event_type not in ALLOWED_PROCTOR_EVENT_TYPES:
+        await _err(
+            manager, participant, room_code,
+            f"Invalid proctor event type '{event_type}'. "
+            f"Allowed: {', '.join(sorted(ALLOWED_PROCTOR_EVENT_TYPES))}.",
+        )
+        return
+
+    duration_s = payload.get("duration_s")
+    if not isinstance(duration_s, (int, float)) or duration_s < 0 or duration_s > 7200:
+        await _err(
+            manager, participant, room_code,
+            "duration_s must be a number between 0 and 7200.",
+        )
+        return
+
+    started_at_raw = payload.get("started_at")
+    if isinstance(started_at_raw, str):
+        try:
+            started_at = datetime.fromisoformat(started_at_raw.replace("Z", "+00:00"))
+        except Exception:
+            await _err(manager, participant, room_code, "Invalid started_at ISO format.")
+            return
+    elif isinstance(started_at_raw, (int, float)):
+        try:
+            started_at = datetime.fromtimestamp(started_at_raw, tz=timezone.utc)
+        except Exception:
+            await _err(manager, participant, room_code, "Invalid started_at timestamp.")
+            return
+    elif isinstance(started_at_raw, datetime):
+        started_at = _ensure_aware(started_at_raw)
+    else:
+        started_at = _utc_now()
+
+    started_at = _ensure_aware(started_at)
+
+    with app.db.session_ctx() as db:
+        session = db.exec(
+            select(InterviewSession).where(InterviewSession.room_code == room_code)
+        ).first()
+
+        if not session:
+            await _err(manager, participant, room_code, "Session not found.")
+            return
+
+        if session.phase == SessionPhase.lobby:
+            await _err(
+                manager, participant, room_code,
+                "Proctor events are only accepted after candidate is admitted.",
+            )
+            return
+
+        # Rate limit: max 60 per minute per participant
+        one_min_ago = _utc_now() - timedelta(seconds=60)
+        recent_count = db.exec(
+            select(func.count(ProctorEvent.id)).where(
+                ProctorEvent.participant_id == participant.id,
+                ProctorEvent.created_at >= one_min_ago,
+            )
+        ).one()
+
+        if recent_count >= 60:
+            await _err(
+                manager, participant, room_code,
+                "Rate limit exceeded: max 60 proctor events per minute.",
+            )
+            return
+
+        event = ProctorEvent(
+            session_id=session.id,
+            participant_id=participant.id,
+            type=event_type,
+            started_at=started_at,
+            duration_s=float(duration_s),
+        )
+        db.add(event)
+        db.commit()
+
+    # Rule: Save only, do NOT broadcast or notify anyone.
